@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+
+
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_logo_app"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_logo_app_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MarkMe"
+        tools:targetApi="31">
+        <activity
+            android:name=".MainActivity"
+        />
+
+        <activity android:name=".LoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".AdminLoginActivity"/>
+        <activity android:name=".StudentDashboardActivity"/>
+        <activity android:name=".TeacherDashboardActivity"/>
+        <activity android:name=".ClassAttendanceActivity"/>
+        <activity android:name=".EditAttendanceActivity"/>
+        <activity android:name=".SessionDetailActivity" />
+        <activity android:name=".AttendanceRecordsActivity" />
+        <activity android:name=".EditProfileActivity" />
+
+        <activity android:name=".ui.ChatbotActivity"
+            android:exported="false"
+            android:label="Chatbot"/>
+
+
+
+
+    </application>
+
+</manifest>

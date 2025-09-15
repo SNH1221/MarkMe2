@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="25dp"
+    android:background="#FFFAFBFF"
+    android:fitsSystemWindows="true"
+   >
+
+    <!-- Header: profile pic + teacher name -->
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/ivProfile"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/ic_person_placeholder"
+            android:contentDescription="profile"
+            android:layout_marginEnd="12dp"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvWelcome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Welcome, Professor (2001)"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tvRole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Teacher Dashboard"
+                android:textSize="13sp"
+                android:textColor="#777777"/>
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnEditProfile"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_edit"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="edit"/>
+    </LinearLayout>
+
+    <!-- Buttons column -->
+    <LinearLayout
+        android:id="@+id/btnColumn"
+        android:layout_below="@id/header"
+        android:layout_marginTop="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btnClasses"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📘 Classes"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnStudents"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="👥 All Students"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnRecords"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📝 Attendance Records"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnChatbot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🤖 Chatbot"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btnPortal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send to Portal"/>
+
+
+    </LinearLayout>
+
+    <!-- Content area: recycler / fragment container -->
+    <FrameLayout
+        android:id="@+id/contentContainer"
+        android:layout_below="@id/btnColumn"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</RelativeLayout>

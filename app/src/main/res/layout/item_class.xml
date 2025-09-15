@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/itemClassRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <!-- Class title (e.g. CSE101 • DBMS) -->
+    <TextView
+        android:id="@+id/tvClassTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CSE101 • DBMS"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="8dp" />
+
+    <!-- Time below title -->
+    <TextView
+        android:id="@+id/tvClassTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="09:00"
+        android:textSize="14sp"
+        android:layout_below="@id/tvClassTitle"
+        android:layout_alignStart="@id/tvClassTitle"
+        android:layout_marginTop="6dp"
+        android:textColor="#666666"/>
+
+    <!-- Optional chevron / icon on right -->
+    <ImageView
+        android:id="@+id/ivClassChevron"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:src="@android:drawable/ic_menu_more" />
+
+</RelativeLayout>
