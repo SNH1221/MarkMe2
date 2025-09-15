@@ -1,1 +1,16 @@
-/build
+# Gradle
+.gradle/
+build/
+*/build/
+
+# Local config (API keys yahan hoti hain)
+local.properties
+*.keystore
+*.jks
+
+# Firebase
+google-services.json
+
+# Android Studio
+.idea/
+*.iml
