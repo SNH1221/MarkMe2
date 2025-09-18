@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/white"
+    android:fitsSystemWindows="true">
+
+    <TextView
+        android:id="@+id/tvTitleSample"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Photo Verification"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvSub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tap Capture for selected students. Upload will happen automatically."
+        android:textSize="13sp"
+        android:paddingBottom="12dp"
+        android:textColor="#666666" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSample"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/btnDone"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Done"
+        android:textAllCaps="false"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="@android:color/holo_purple"
+        android:textColor="@android:color/white" />
+
+</LinearLayout>

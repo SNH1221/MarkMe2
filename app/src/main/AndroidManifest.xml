@@ -45,6 +45,7 @@
         <activity android:name=".SessionDetailActivity" />
         <activity android:name=".AttendanceRecordsActivity" />
         <activity android:name=".EditProfileActivity" />
+        <activity android:name=".SampleVerificationActivity" />
 
         <activity android:name=".ui.ChatbotActivity"
             android:exported="false"

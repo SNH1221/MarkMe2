@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="88dp"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/tvStudentName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Student Name"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvStudentId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1001"
+        android:textSize="13sp"
+        android:layout_below="@id/tvStudentName"
+        android:paddingTop="4dp"
+        android:textColor="#666666" />
+
+    <ImageView
+        android:id="@+id/ivPreview"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:scaleType="centerCrop"
+        android:src="@android:drawable/ic_menu_camera"
+        android:contentDescription="preview"
+        android:fitsSystemWindows="true"/>
+
+    <Button
+        android:id="@+id/btnCapture"
+        android:layout_width="110dp"
+        android:layout_height="36dp"
+        android:text="Capture"
+        android:textAllCaps="false"
+        android:layout_toLeftOf="@id/ivPreview"
+        android:layout_alignTop="@id/ivPreview"
+        android:layout_marginRight="8dp"
+        android:backgroundTint="@android:color/holo_blue_light"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="pending"
+        android:textSize="12sp"
+        android:layout_toLeftOf="@id/ivPreview"
+        android:layout_below="@id/btnCapture"
+        android:layout_marginTop="6dp"
+        android:textColor="#FF5722" />
+
+</RelativeLayout>

@@ -1,9 +1,6 @@
 package com.skyrist.markme
 
-import androidx.recyclerview.widget.RecyclerView
-import com.skyrist.markme.SharedPrefHelper
-import com.skyrist.markme.StudentsAdapter
-
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -14,9 +11,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.random.Random
 
 class ClassAttendanceActivity : AppCompatActivity() {
 
@@ -58,15 +59,14 @@ class ClassAttendanceActivity : AppCompatActivity() {
 
         tvHeader.text = "$subjectName ($classId)"
 
-        // IMPORTANT: pass the same statusMap to adapter
+        // pass the same statusMap to the adapter so UI reflects updates
         adapter = StudentsAdapter(studentsList, statusMap, editEnabled = false)
         rvStudents.layoutManager = LinearLayoutManager(this)
         rvStudents.adapter = adapter
 
         btnStart.setOnClickListener { startAttendance() }
         btnStop.setOnClickListener { stopAttendance() }
-        btnSave.setOnClickListener {
-            saveAttendanceToFirestore() }
+        btnSave.setOnClickListener { saveAttendanceToFirestore() }
 
         setupScannerInput()
         loadStudentsForClass()
@@ -79,6 +79,7 @@ class ClassAttendanceActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (s == null) return
                 val text = s.toString()
+                // typical scanner sends newline; also guard against long input
                 if (text.contains("\n") || text.contains("\r") || text.length > 10) {
                     val raw = text.trim().replace(Regex("[\\r\\n\\t]"), "")
                     etScannerInput.setText("") // clear for next scan
@@ -145,6 +146,10 @@ class ClassAttendanceActivity : AppCompatActivity() {
         Toast.makeText(this, "Attendance stopped. Pending -> absent.", Toast.LENGTH_SHORT).show()
     }
 
+    /**
+     * Save attendance and then generate verification sampling fields in the created Firestore doc.
+     * Replaces/extends earlier simple save function — creates sampleNeeded & sampleStatus after getting docId.
+     */
     private fun saveAttendanceToFirestore() {
         // sanity
         if (studentsList.isEmpty()) {
@@ -173,48 +178,87 @@ class ClassAttendanceActivity : AppCompatActivity() {
             if (status == "present") presentList.add(studentId) else absentList.add(studentId)
         }
 
-        // Build document to save
+        // base attendance document
         val attendanceDoc = hashMapOf<String, Any>(
             "classId" to classId,
             "subject" to subjectName,
             "teacherId" to teacherId,
-            "date" to dateFmt.format(now),
-            "time" to timeFmt.format(now),
-            "students" to adapter.getAttendanceMap(),
+            "date" to dateStr,
+            "time" to timeStr,
+            "students" to attendanceMap,
             "presentList" to presentList,
             "absentList" to absentList,
-            "savedAt" to com.google.firebase.Timestamp.now()
+            "savedAt" to Timestamp.now(),
+            "verificationStatus" to "pending",
+            "flagged" to false
         )
 
         // write to Firestore
         db.collection("AttendanceSessions")
             .add(attendanceDoc)
             .addOnSuccessListener { ref ->
-                // success: get sessionKey and open EditAttendanceActivity with extras
                 val sessionKey = ref.id
+                Log.d(TAG, "Attendance doc created sessionKey=$sessionKey")
 
-                Toast.makeText(this, "Attendance saved.", Toast.LENGTH_SHORT).show()
+                // compute sample size & pick random sample using sessionKey as seed
+                val classSize = studentsList.size
+                val k = pickSampleSize(classSize)
+                val sample = pickRandomSample(presentList, k, sessionKey)
 
-                // prepare intent to EditAttendanceActivity
-                val intent = android.content.Intent(this, EditAttendanceActivity::class.java).apply {
-                    putExtra("sessionKey", sessionKey)
-                    putExtra("classId", classId)
-                    putExtra("subjectName", subjectName)
-                    putStringArrayListExtra("present", presentList)
-                    putStringArrayListExtra("absent", absentList)
-                }
-                startActivity(intent)
+                // build sampleStatus map
+                val sampleStatus = mutableMapOf<String, String>()
+                for (s in sample) sampleStatus[s] = "pending"
 
-                // optionally keep save disabled or re-enable depending on UX
-                btnSave.isEnabled = true
+                // Prepare updates to merge into the created doc
+                val updates = hashMapOf<String, Any>(
+                    "sampleNeeded" to sample,
+                    "sampleStatus" to sampleStatus,
+                    "verificationStatus" to "pending",
+                    "flagged" to false,
+                    "samplingGeneratedAt" to Timestamp.now()
+                )
+
+                // Merge sampling fields into same document
+                db.collection("AttendanceSessions").document(sessionKey)
+                    .set(updates, com.google.firebase.firestore.SetOptions.merge())
+                    .addOnSuccessListener {
+                        Log.d(TAG, "Sampling fields written for $sessionKey -> $sample")
+                        Toast.makeText(this, "Attendance saved.", Toast.LENGTH_SHORT).show()
+
+                        // start EditAttendanceActivity as before (send sessionKey & lists)
+                        val intent = Intent(this, EditAttendanceActivity::class.java).apply {
+                            putExtra("sessionKey", sessionKey)
+                            putExtra("classId", classId)
+                            putExtra("subjectName", subjectName)
+                            putStringArrayListExtra("present", presentList)
+                            putStringArrayListExtra("absent", absentList)
+                        }
+                        startActivity(intent)
+
+                        btnSave.isEnabled = true
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "Failed write sampling fields: ${e.message}")
+                        Toast.makeText(this, "Saved but failed to prepare verification sample: ${e.message}", Toast.LENGTH_LONG).show()
+                        val intent = Intent(this, EditAttendanceActivity::class.java).apply {
+                            putExtra("sessionKey", sessionKey)
+                            putExtra("classId", classId)
+                            putExtra("subjectName", subjectName)
+                            putStringArrayListExtra("present", presentList)
+                            putStringArrayListExtra("absent", absentList)
+                        }
+                        startActivity(intent)
+                        btnSave.isEnabled = true
+                    }
             }
             .addOnFailureListener { e ->
                 Toast.makeText(this, "Save failed: ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e(TAG, "saveAttendanceToFirestore failed", e)
                 btnSave.isEnabled = true
             }
     }
 
-    // ✅ Toasts fixed here
+    // handle a scanned raw string from the scanner or keyboard input
     private fun handleScannedRaw(raw: String) {
         if (raw.isEmpty()) return
         val scanned = raw.trim().replace(Regex("[\\r\\n\\t]"), "")
@@ -225,19 +269,55 @@ class ClassAttendanceActivity : AppCompatActivity() {
             return
         }
 
-        // Save present count before scan
-        val beforePresent = statusMap.values.count { it == "present" }
+        // record present ids before marking
+        val beforePresentIds = statusMap.filterValues { it == "present" }.keys.toMutableSet()
 
-        // call adapter and get the matched id
-        val matchedId = adapter.markPresentByRfid(scanned)
+        // call adapter to attempt to mark present by rfid (adapter will update statusMap)
+        // adapter.markPresentByRfid(...) originally didn't return id in some versions,
+        // so we rely on statusMap diff to find which id became present.
+        adapter.markPresentByRfid(scanned)
 
-        if (matchedId != null) {
-            // find student by id from the list you maintain in the Activity
-            val student = studentsList.find { it.id == matchedId }
-            val name = student?.name ?: matchedId // fallback to id if name not found
-            Toast.makeText(this, "Present $name", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "Unknown card", Toast.LENGTH_SHORT).show()
+        // also try digits-only variant in case scanner sends extra characters
+        val digits = scanned.replace(Regex("[^0-9]"), "")
+        if (digits != scanned && digits.isNotEmpty()) {
+            adapter.markPresentByRfid(digits)
         }
+
+        // after attempt, compute new present ids
+        val afterPresentIds = statusMap.filterValues { it == "present" }.keys.toMutableSet()
+
+        val newlyMarked = afterPresentIds.subtract(beforePresentIds)
+        if (newlyMarked.isNotEmpty()) {
+            // get the last one (or any) — typically one card scan marks one student
+            val newId = newlyMarked.last()
+            val student = studentsList.find { it.id == newId }
+            val name = student?.name ?: newId
+            Toast.makeText(this, "Present: $name", Toast.LENGTH_SHORT).show()
+            Log.d(TAG, "Marked present id=$newId name=$name")
+        } else {
+            Toast.makeText(this, "Unknown card / no match", Toast.LENGTH_SHORT).show()
+            Log.d(TAG, "No student matched scanned value [$scanned]")
+        }
+    }
+
+    // pick sample size based on class size
+    private fun pickSampleSize(classSize: Int): Int {
+        return when {
+            classSize <= 30 -> 3
+            classSize <= 60 -> 5
+            else -> maxOf(8, (classSize / 10)) // ~10% or at least 8
+        }
+    }
+
+    // pick k random students from present list using sessionSeed (docId) for variation
+    private fun pickRandomSample(presentList: List<String>, k: Int, sessionSeed: String): List<String> {
+        if (presentList.size <= k) return presentList
+        val seed = sessionSeed.hashCode().toLong() xor System.currentTimeMillis()
+        return presentList.shuffled(Random(seed)).take(k)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // if you registered any receivers or listeners, unregister here (none in this file)
     }
 }
