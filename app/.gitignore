@@ -3,7 +3,7 @@
 build/
 */build/
 
-# Local config (API keys yahan hoti hain)
+# Local config 
 local.properties
 *.keystore
 *.jks
