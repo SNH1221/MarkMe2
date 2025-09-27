@@ -35,7 +35,7 @@ MarkMe is a smart attendance system that uses *RFID cards* to automate student a
 4. Teacher saves session → system selects *random sample (2–8 students)* for verification  
 5. Teacher uploads/captures photos of sampled students → stored in Firebase Storage  
 6. Firestore updates fields like: sampleNeeded, sampleStatus, verificationStatus, photos.<studentId>  
-7. SMS notification sent to parents (if enabled)  
+7. SMS notification sent to parents 
 8. Records available in dashboard + export option  
 
 ## 👨‍💻 Team  
