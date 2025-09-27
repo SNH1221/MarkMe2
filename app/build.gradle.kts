@@ -20,12 +20,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
 
-        buildConfigField("String", "SMS_BASE_URL", "\"https://markme-sms-server.onrender.com/\"")
-        buildConfigField("String", "SMS_API_KEY", "\"my-secret-key-1221\"")
+        buildConfigField(""")
+        buildConfigField("String", """)
 
 
         // replace YOUR_API_KEY_HERE with the key you generated (keep quotes)
-        buildConfigField("String", "GEMINI_API_KEY", "\"AIzaSyBm7GPlyk1MK3IlR8ff1LS_QOgyNdFqXVo\"")
+        buildConfigField("String", """)
 
     }
 
